@@ -1,0 +1,60 @@
+version: '3.5'
+
+services:
+  boomtown.app:
+    build:
+      context: .
+      dockerfile: app/boomtown.DockerFile
+      args:
+          BASH_PROMPT: "\\u@docker.boomtown.app:\\w$$ "
+    image: boomtown.app
+    container_name: boomtown.app
+    command: /entrypoint.sh
+    hostname: boomtown.local
+    ports:
+      - 8005:80
+    depends_on:
+      - boomtown.mysql
+    links:
+      - boomtown.mysql
+    environment:
+      STAGING: 1
+    working_dir: /var/www/vhosts/boomtown
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ${APP_PATH}:/var/www/vhosts/boomtown:cached
+      - ./app/files/nginx/boomtown.conf:/etc/nginx/conf.d/boomtown.conf
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - boomtown.app.network
+  boomtown.mysql:
+    image: mysql:5.7.37
+    platform: linux/amd64
+    container_name: boomtown.mysql
+    command: --sql_mode="NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+    restart: always
+    hostname: dbhost
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - ${MYSQL_PORT}:3306
+    volumes:
+      - ${DB_MYSQL_PATH}:/var/lib/mysql
+    networks:
+      - boomtown.app.network
+
+
+#persistant data volumes
+volumes:
+  boomtown.mysql:
+
+networks:
+  boomtown.app.network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.7.0/24
