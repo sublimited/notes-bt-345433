@@ -89,6 +89,9 @@ class NotesService extends AbstractApiService
     public function update(Request $request)
     {
         try {
+            
+            $data=[];
+
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:255',
                 'body' => 'required',
@@ -112,13 +115,15 @@ class NotesService extends AbstractApiService
 
                     $rec->where('id',$request->id)->update($data);
                     $id = $request->id;
+
+                    $data = Notes::where('id', $id)->first();
                 } else {
                     throw new ApiException(JsonResponse::HTTP_FORBIDDEN, 'invalid id');
                 }
             }
 
 
-            return $this->handleSuccess(['id' => $id]);
+            return $this->handleSuccess($data);
         } catch (ApiException $e) {
             return $this->handleApiException($e);
         } catch (\Exception $e) {
