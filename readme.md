@@ -1,5 +1,12 @@
 notes app
 
+`initial:`<br /><br />
+mkdir -p ~/projects/boomtown/db<br />
+cd ~/projects/boomtown/<br />
+git clone https://github.com/sublimited/notes-bt-345433.git .<br />
+cd docker/<br />
+<br />
+
 `startup docker:`<br />
 local$ cd docker && docker-compose up -d <br />
 local$ docker exec -it boomtown.app bash<br />
